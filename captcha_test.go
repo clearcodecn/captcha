@@ -6,33 +6,34 @@ package captcha
 
 import (
 	"bytes"
+	"context"
 	"testing"
 )
 
 func TestNew(t *testing.T) {
-	c := New()
+	c := New(context.Background())
 	if c == "" {
 		t.Errorf("expected id, got empty string")
 	}
 }
 
 func TestVerify(t *testing.T) {
-	id := New()
-	if Verify(id, []byte{0, 0}) {
+	id := New(context.Background())
+	if Verify(context.Background(), id, []byte{0, 0}) {
 		t.Errorf("verified wrong captcha")
 	}
-	id = New()
-	d := globalStore.Get(id, false) // cheating
-	if !Verify(id, d) {
+	id = New(context.Background())
+	d := globalStore.Get(context.Background(), id, false) // cheating
+	if !Verify(context.Background(), id, d) {
 		t.Errorf("proper captcha not verified")
 	}
 }
 
 func TestReload(t *testing.T) {
-	id := New()
-	d1 := globalStore.Get(id, false) // cheating
-	Reload(id)
-	d2 := globalStore.Get(id, false) // cheating again
+	id := New(context.Background())
+	d1 := globalStore.Get(context.Background(), id, false) // cheating
+	Reload(context.Background(), id)
+	d2 := globalStore.Get(context.Background(), id, false) // cheating again
 	if bytes.Equal(d1, d2) {
 		t.Errorf("reload didn't work: %v = %v", d1, d2)
 	}

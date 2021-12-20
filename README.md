@@ -1,3 +1,25 @@
+### Note 
+
+The repostory is forked from  `github.com/dchest/captcha` 
+
+And change the default store interface. 
+
+New package name is `github.com/clearcodecn/captcha`
+
+If you want to use customer context via get/set methods. you can try it.
+
+```go
+type Store interface {
+	// Set sets the digits for the captcha id.
+	Set(ctx context.Context, id string, digits []byte)
+
+	// Get returns stored digits for the captcha id. Clear indicates
+	// whether the captcha must be deleted from the store.
+	Get(ctx context.Context, id string, clear bool) (digits []byte)
+}
+```
+
+------
 Package captcha
 =====================
 
@@ -96,14 +118,14 @@ Functions
 
 ### func New
 
-	func New() string
+	func New(ctx context.Context) string
 	
 New creates a new captcha with the standard length, saves it in the internal
 storage and returns its id.
 
 ### func NewLen
 
-	func NewLen(length int) (id string)
+	func NewLen(ctx context.Context,length int) (id string)
 	
 NewLen is just like New, but accepts length of a captcha solution as the
 argument.
@@ -118,7 +140,7 @@ solution.
 
 ### func Reload
 
-	func Reload(id string) bool
+	func Reload(ctx context.Context,id string) bool
 	
 Reload generates and remembers new digits for the given captcha id.  This
 function returns false if there is no captcha with the given id.
@@ -163,7 +185,7 @@ memory store. This function must be called before generating any captchas.
 
 ### func Verify
 
-	func Verify(id string, digits []byte) bool
+	func Verify(ctx context.Context,id string, digits []byte) bool
 	
 Verify returns true if the given digits are the ones that were used to
 create the given captcha id.
@@ -173,7 +195,7 @@ storage, so that the same captcha can't be verified anymore.
 
 ### func VerifyString
 
-	func VerifyString(id string, digits string) bool
+	func VerifyString(ctx context.Context,id string, digits string) bool
 	
 VerifyString is like Verify, but accepts a string of digits.  It removes
 spaces and commas from the string, but any other characters, apart from
@@ -181,7 +203,7 @@ digits and listed above, will cause the function to return false.
 
 ### func WriteAudio
 
-	func WriteAudio(w io.Writer, id string, lang string) error
+	func WriteAudio(ctx context.Context,w io.Writer, id string, lang string) error
 	
 WriteAudio writes WAV-encoded audio representation of the captcha with the
 given id and the given language. If there are no sounds for the given
@@ -189,7 +211,7 @@ language, English is used.
 
 ### func WriteImage
 
-	func WriteImage(w io.Writer, id string, width, height int) error
+	func WriteImage(ctx context.Context,w io.Writer, id string, width, height int) error
 	
 WriteImage writes PNG-encoded image representation of the captcha with the
 given id. The image will have the given width and height.
@@ -252,11 +274,11 @@ WriteTo writes captcha image in PNG format into the given writer.
 ``` go
 type Store interface {
     // Set sets the digits for the captcha id.
-    Set(id string, digits []byte)
+    Set(ctx context.Context,id string, digits []byte)
 
     // Get returns stored digits for the captcha id. Clear indicates
     // whether the captcha must be deleted from the store.
-    Get(id string, clear bool) (digits []byte)
+    Get(ctx context.Context,id string, clear bool) (digits []byte)
 }
 ```
 

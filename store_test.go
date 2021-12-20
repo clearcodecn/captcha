@@ -6,6 +6,7 @@ package captcha
 
 import (
 	"bytes"
+	"context"
 	"testing"
 )
 
@@ -13,8 +14,8 @@ func TestSetGet(t *testing.T) {
 	s := NewMemoryStore(CollectNum, Expiration)
 	id := "captcha id"
 	d := RandomDigits(10)
-	s.Set(id, d)
-	d2 := s.Get(id, false)
+	s.Set(context.Background(), id, d)
+	d2 := s.Get(context.Background(), id, false)
 	if d2 == nil || !bytes.Equal(d, d2) {
 		t.Errorf("saved %v, getDigits returned got %v", d, d2)
 	}
@@ -24,12 +25,12 @@ func TestGetClear(t *testing.T) {
 	s := NewMemoryStore(CollectNum, Expiration)
 	id := "captcha id"
 	d := RandomDigits(10)
-	s.Set(id, d)
-	d2 := s.Get(id, true)
+	s.Set(context.Background(), id, d)
+	d2 := s.Get(context.Background(), id, true)
 	if d2 == nil || !bytes.Equal(d, d2) {
 		t.Errorf("saved %v, getDigitsClear returned got %v", d, d2)
 	}
-	d2 = s.Get(id, false)
+	d2 = s.Get(context.Background(), id, false)
 	if d2 != nil {
 		t.Errorf("getDigitClear didn't clear (%q=%v)", id, d2)
 	}
@@ -44,13 +45,13 @@ func TestCollect(t *testing.T) {
 	d := RandomDigits(10)
 	for i := range ids {
 		ids[i] = randomId()
-		s.Set(ids[i], d)
+		s.Set(context.Background(), ids[i], d)
 	}
 	s.(*memoryStore).collect()
 	// Must be already collected
 	nc := 0
 	for i := range ids {
-		d2 := s.Get(ids[i], false)
+		d2 := s.Get(context.Background(), ids[i], false)
 		if d2 != nil {
 			t.Errorf("%d: not collected", i)
 			nc++
@@ -72,7 +73,7 @@ func BenchmarkSetCollect(b *testing.B) {
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		for j := 0; j < 1000; j++ {
-			s.Set(ids[j], d)
+			s.Set(context.Background(), ids[j], d)
 		}
 		s.(*memoryStore).collect()
 	}

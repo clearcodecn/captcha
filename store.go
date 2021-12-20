@@ -6,11 +6,12 @@ package captcha
 
 import (
 	"container/list"
+	"context"
 	"sync"
 	"time"
 )
 
-// An object implementing Store interface can be registered with SetCustomStore
+// Store An object implementing Store interface can be registered with SetCustomStore
 // function to handle storage and retrieval of captcha ids and solutions for
 // them, replacing the default memory store.
 //
@@ -19,11 +20,11 @@ import (
 // method after the certain amount of captchas has been stored.)
 type Store interface {
 	// Set sets the digits for the captcha id.
-	Set(id string, digits []byte)
+	Set(ctx context.Context, id string, digits []byte)
 
 	// Get returns stored digits for the captcha id. Clear indicates
 	// whether the captcha must be deleted from the store.
-	Get(id string, clear bool) (digits []byte)
+	Get(ctx context.Context, id string, clear bool) (digits []byte)
 }
 
 // expValue stores timestamp and id of captchas. It is used in the list inside
@@ -59,7 +60,7 @@ func NewMemoryStore(collectNum int, expiration time.Duration) Store {
 	return s
 }
 
-func (s *memoryStore) Set(id string, digits []byte) {
+func (s *memoryStore) Set(ctx context.Context, id string, digits []byte) {
 	s.Lock()
 	s.digitsById[id] = digits
 	s.idByTime.PushBack(idByTimeValue{time.Now(), id})
@@ -72,7 +73,7 @@ func (s *memoryStore) Set(id string, digits []byte) {
 	go s.collect()
 }
 
-func (s *memoryStore) Get(id string, clear bool) (digits []byte) {
+func (s *memoryStore) Get(ctx context.Context, id string, clear bool) (digits []byte) {
 	if !clear {
 		// When we don't need to clear captcha, acquire read lock.
 		s.RLock()
