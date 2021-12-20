@@ -19,6 +19,11 @@ type Store interface {
 }
 ```
 
+Install
+```go
+go get github.com/clearcodecn/captcha
+```
+
 ------
 Package captcha
 =====================
